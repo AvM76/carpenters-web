@@ -1,45 +1,17 @@
 ---
 import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import { featuredPhoto, workSections } from '../photos';
 
-/* The work stream. Anne adds a piece simply by dropping a photo into
-   src/assets/work/ — no titles, categories or captions. This glob picks
-   every image up automatically and Astro optimises each one.
-
-   ORDERING: with no metadata, order comes from the filename, sorted
-   reverse-alphabetically. Name files with a date prefix (e.g.
-   2026-05-oak-island.jpg) and newest sorts to the top for free. */
-// Glob every file in the folder, then keep images. A single `*` pattern
-// avoids the duplicate matches a {jpg,JPG} brace list causes on
-// case-insensitive filesystems.
-const modules = import.meta.glob<{ default: ImageMetadata }>('../assets/work/*', {
-  eager: true,
-});
-const isImage = (p: string) => /\.(jpe?g|png|webp|avif)$/i.test(p);
-
-interface Props {
-  /** Filename fragments to pull out as the large feature + skip in the grid. */
-  featureMatch?: string;
-  /** Filename fragments rendered elsewhere (e.g. the hero) — skip in the grid. */
-  exclude?: string[];
-}
-const { featureMatch = 'IMG_2387', exclude = [] } = Astro.props;
-
-const all = Object.entries(modules)
-  .filter(([path]) => isImage(path))
-  .map(([path, mod]) => ({ path, img: mod.default }))
-  .sort((a, b) => b.path.localeCompare(a.path));
-
-const feature = all.find((e) => e.path.includes(featureMatch)) ?? all[0];
-const skip = new Set([feature?.path, ...all.filter((e) => exclude.some((x) => e.path.includes(x))).map((e) => e.path)]);
-const grid = all.filter((e) => !skip.has(e.path));
+/* The work stream: one large featured photo, a row of jump buttons, then a
+   gallery per folder in src/assets/work/. Adding a photo or a whole section
+   is just a matter of adding files/folders — see src/photos.ts. */
 ---
 
 {
-  feature && (
+  featuredPhoto && (
     <div class="feature reveal">
       <Image
-        src={feature.img}
+        src={featuredPhoto}
         alt="Finished piece by AVM Timber Design"
         widths={[768, 1280, 1920]}
         sizes="100vw"
@@ -48,18 +20,34 @@ const grid = all.filter((e) => !skip.has(e.path));
   )
 }
 
-<div class="masonry">
+<nav class="jump" aria-label="Jump to a section">
   {
-    grid.map((e) => (
-      <figure class="reveal">
-        <Image
-          src={e.img}
-          alt="Bespoke joinery by AVM Timber Design"
-          widths={[400, 700, 1000]}
-          sizes="(max-width: 560px) 100vw, (max-width: 820px) 50vw, 33vw"
-          loading="lazy"
-        />
-      </figure>
+    workSections.map((s) => (
+      <a href={`#${s.id}`}>
+        {s.title}
+        <span class="n">{s.photos.length}</span>
+      </a>
     ))
   }
-</div>
+</nav>
+
+{
+  workSections.map((s) => (
+    <section class="work-sec" id={s.id}>
+      <h3 class="reveal">{s.title}</h3>
+      <div class="masonry">
+        {s.photos.map((img) => (
+          <figure class="reveal">
+            <Image
+              src={img}
+              alt={`${s.title} by AVM Timber Design`}
+              widths={[400, 700, 1000]}
+              sizes="(max-width: 560px) 100vw, (max-width: 820px) 50vw, 33vw"
+              loading="lazy"
+            />
+          </figure>
+        ))}
+      </div>
+    </section>
+  ))
+}
