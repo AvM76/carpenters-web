@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Gallery from '../components/Gallery.astro';
 import { site } from '../site';
-import heroImg from '../assets/work/IMG_6086.JPEG';
+import { topPhoto, annePhoto } from '../photos';
 import compass from '../assets/brand/compass-cyan.png';
 import qr from '../assets/brand/avm-qr.jpg';
 
@@ -13,13 +13,17 @@ const igUrl = `https://instagram.com/${site.instagramHandle}`;
 <BaseLayout>
   <!-- ===================== HERO ===================== -->
   <section class="hero">
-    <Image
-      src={heroImg}
-      alt="Oak-slatted kitchen island with marble worktop"
-      widths={[768, 1280, 1920, 2400]}
-      sizes="100vw"
-      loading="eager"
-    />
+    {
+      topPhoto && (
+        <Image
+          src={topPhoto}
+          alt="Bespoke joinery by AVM Timber Design"
+          widths={[768, 1280, 1920, 2400]}
+          sizes="100vw"
+          loading="eager"
+        />
+      )
+    }
     <div class="hero-in shell pad">
       <span class="eyebrow">Bespoke joinery · North London</span>
       <h1>The patience of a <em>master craftsman</em>, brought to the rooms you live in.</h1>
@@ -58,7 +62,7 @@ const igUrl = `https://instagram.com/${site.instagramHandle}`;
       <h2>Selected work</h2>
       <p class="meta">An ongoing record of finished pieces — newest first.</p>
     </div>
-    <Gallery featureMatch="IMG_2387" exclude={['IMG_6086']} />
+    <Gallery />
   </section>
 
   <!-- ===================== SERVICES ===================== -->
@@ -182,9 +186,21 @@ const igUrl = `https://instagram.com/${site.instagramHandle}`;
   <!-- ===================== ABOUT ===================== -->
   <section class="about shell pad" id="about">
     <div class="col-media">
-      <!-- No portrait of Anne yet: clearly-marked placeholder slot.
-           Replace with <Image> of a workshop photo when supplied. -->
-      <div class="ph reveal"><span>portrait — Anne in the workshop</span></div>
+      <!-- Anne's photo comes from src/assets/anne-photo/. Until one is
+           there, a clearly-marked placeholder shows instead. -->
+      {
+        annePhoto ? (
+          <Image
+            class="portrait reveal"
+            src={annePhoto}
+            alt="Anne van Mansvelt in the workshop"
+            widths={[480, 800, 1200]}
+            sizes="(max-width: 1080px) 100vw, 40vw"
+          />
+        ) : (
+          <div class="ph reveal"><span>portrait — Anne in the workshop</span></div>
+        )
+      }
     </div>
     <div class="reveal">
       <span class="eyebrow">About Anne</span>
